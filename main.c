@@ -33,6 +33,7 @@ typedef struct {
 
 typedef bool (*CompareFunction)(Data_t* a, Data_t* b);
 typedef bool (*MatchStrFunction)(Data_t* data, const char* str);
+typedef bool (*MatchIntFunction)(Data_t* data, const int number);
 
 Data_t list_data[MAX_DATA_COUNT];
 Data_t export_list_data[MAX_DATA_COUNT];
@@ -91,68 +92,28 @@ static int get_column_id(void) {
     return -1;
 }
 
-static int search_by_price(Data_t* dest) {
-    int price;
-    fflush(stdin);
-    scanf("%d", &price);
-
-    int i, found = 0;
-    for (i = 0; list_data[i].price != -1 && i < data_count; i++) {
-        if (list_data[i].price == price) {
-            dest[found++] = list_data[i];
-        }
-    }
-    return found;
-}
-
-static int search_by_rooms(Data_t* dest) {
-    int rooms;
-    fflush(stdin);
-    scanf("%d", &rooms);
-
-    int i, found = 0;
-    for (i = 0; list_data[i].price != -1 && i < data_count; i++) {
-        if (list_data[i].rooms == rooms) {
-            dest[found++] = list_data[i];
-        }
-    }
-    return found;
-}
-
-static int search_by_bathroom(Data_t* dest) {
-    int bathroom;
-    fflush(stdin);
-    scanf("%d", &bathroom);
-
-    int i, found = 0;
-    for (i = 0; list_data[i].price != -1 && i < data_count; i++) {
-        if (list_data[i].bathroom == bathroom) {
-            dest[found++] = list_data[i];
-        }
-    }
-    return found;
-}
-
-static int search_by_park(Data_t* dest) {
-    int park;
-    fflush(stdin);
-    scanf("%d", &park);
-
-    int i, found = 0;
-    for (i = 0; list_data[i].price != -1 && i < data_count; i++) {
-        if (list_data[i].park == park) {
-            dest[found++] = list_data[i];
-        }
-    }
-    return found;
-}
-
 static bool match_location(Data_t* data, const char* location) {
     return !strcmp(data->location, location);
 }
 
 static bool match_city(Data_t* data, const char* city) {
     return !strcmp(data->city, city);
+}
+
+static bool match_price(Data_t* data, const int price) {
+    return (data->price == price);
+}
+
+static bool match_rooms(Data_t* data, const int rooms) {
+    return (data->rooms == rooms);
+}
+
+static bool match_bathroom(Data_t* data, const int bathroom) {
+    return (data->bathroom == bathroom);
+}
+
+static bool match_park(Data_t* data, const int park) {
+    return (data->park == park);
 }
 
 static bool match_type(Data_t* data, const char* type) {
@@ -171,6 +132,20 @@ static int search_string(Data_t* dest, MatchStrFunction match) {
     int i, found = 0;
     for (i = 0; list_data[i].price != -1 && i < data_count; i++) {
         if (match(&list_data[i], str)) {
+            dest[found++] = list_data[i];
+        }
+    }
+    return found;
+}
+
+static int search_integer(Data_t* dest, MatchIntFunction match) {
+    int num;
+    fflush(stdin);
+    scanf("%d", &num);
+
+    int i, found = 0;
+    for (i = 0; list_data[i].price != -1 && i < data_count; i++) {
+        if (match(&list_data[i], num)) {
             dest[found++] = list_data[i];
         }
     }
@@ -232,16 +207,16 @@ void search_data(void) {
             found = search_string(export_list_data, match_city);
             break;
         case SEARCH_PRICE:
-            found = search_by_price(export_list_data);
+            found = search_integer(export_list_data, match_price);
             break;
         case SEARCH_ROOMS:
-            found = search_by_rooms(export_list_data);
+            found = search_integer(export_list_data, match_rooms);
             break;
         case SEARCH_BATHROOM:
-            found = search_by_bathroom(export_list_data);
+            found = search_integer(export_list_data, match_bathroom);
             break;
         case SEARCH_PARK:
-            found = search_by_park(export_list_data);
+            found = search_integer(export_list_data, match_park);
             break;
         case SEARCH_TYPE:
             found = search_string(export_list_data, match_type);
