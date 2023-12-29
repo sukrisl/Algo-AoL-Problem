@@ -20,6 +20,9 @@
 #define SEARCH_TYPE 6
 #define SEARCH_FURNISH 7
 
+#define SORT_ASCENDING 0
+#define SORT_DESCENDING 1
+
 typedef struct {
     char location[100];
     char city[100];
@@ -27,6 +30,8 @@ typedef struct {
     char type[100];
     char furnish[100];
 } Data_t;
+
+typedef bool (*CompareFunction)(Data_t* a, Data_t* b);
 
 Data_t list_data[MAX_DATA_COUNT];
 Data_t export_list_data[MAX_DATA_COUNT];
@@ -50,14 +55,10 @@ static void init_mem(Data_t* list, size_t size) {
     for (i = 0; i < size; i++) list[i].price = -1;
 }
 
-int display_data(void) {
-    int target_row;
-    printf("Number of rows: ");
-    scanf("%d", &target_row);
-
-    int i;
-    print_header();
-    for (i = 0; (i < target_row) && (list_data[i].price != -1); i++) print_data(&list_data[i]);
+static void swap(Data_t* a, Data_t* b) {
+    Data_t buffer = *a;
+    *a = *b;
+    *b = buffer;
 }
 
 static int get_column_id(void) {
@@ -89,7 +90,7 @@ static int get_column_id(void) {
     return -1;
 }
 
-int search_by_location(Data_t* dest) {
+static int search_by_location(Data_t* dest) {
     char location[100];
     fflush(stdin);
     gets(location);
@@ -103,7 +104,7 @@ int search_by_location(Data_t* dest) {
     return found;
 }
 
-int search_by_city(Data_t* dest) {
+static int search_by_city(Data_t* dest) {
     char city[100];
     fflush(stdin);
     gets(city);
@@ -117,7 +118,7 @@ int search_by_city(Data_t* dest) {
     return found;
 }
 
-int search_by_price(Data_t* dest) {
+static int search_by_price(Data_t* dest) {
     int price;
     fflush(stdin);
     scanf("%d", &price);
@@ -131,7 +132,7 @@ int search_by_price(Data_t* dest) {
     return found;
 }
 
-int search_by_rooms(Data_t* dest) {
+static int search_by_rooms(Data_t* dest) {
     int rooms;
     fflush(stdin);
     scanf("%d", &rooms);
@@ -145,7 +146,7 @@ int search_by_rooms(Data_t* dest) {
     return found;
 }
 
-int search_by_bathroom(Data_t* dest) {
+static int search_by_bathroom(Data_t* dest) {
     int bathroom;
     fflush(stdin);
     scanf("%d", &bathroom);
@@ -159,7 +160,7 @@ int search_by_bathroom(Data_t* dest) {
     return found;
 }
 
-int search_by_park(Data_t* dest) {
+static int search_by_park(Data_t* dest) {
     int park;
     fflush(stdin);
     scanf("%d", &park);
@@ -173,7 +174,7 @@ int search_by_park(Data_t* dest) {
     return found;
 }
 
-int search_by_type(Data_t* dest) {
+static int search_by_type(Data_t* dest) {
     char type[100];
     fflush(stdin);
     gets(type);
@@ -187,7 +188,7 @@ int search_by_type(Data_t* dest) {
     return found;
 }
 
-int search_by_furnish(Data_t* dest) {
+static int search_by_furnish(Data_t* dest) {
     char furnish[100];
     fflush(stdin);
     gets(furnish);
@@ -199,6 +200,47 @@ int search_by_furnish(Data_t* dest) {
         }
     }
     return found;
+}
+
+static bool compare_price(Data_t* a, Data_t* b) {
+    return (a->price < b->price);
+}
+
+static bool compare_room(Data_t* a, Data_t* b) {
+    return (a->rooms < b->rooms);
+}
+
+static bool compare_bathroom(Data_t* a, Data_t* b) {
+    return (a->bathroom < b->bathroom);
+}
+
+static bool compare_park(Data_t* a, Data_t* b) {
+    return (a->park < b->park);
+}
+
+static void bubble_sort(Data_t* data, size_t size, int order, CompareFunction comp) {
+    int i, j;
+    for (i = 0; i < size - 1; i++) {
+        bool swapped = false;
+        for (j = 0; j < size - i - 1; j++) {
+            bool need_swap = order ? comp(&data[j], &data[j + 1]) : comp(&data[j + 1], &data[j]);
+            if (need_swap) {
+                swap(&data[j], &data[j + 1]);
+                swapped = true;
+            }
+        }
+        if (swapped == false) break;
+    }
+}
+
+int display_data(void) {
+    int target_row;
+    printf("Number of rows: ");
+    scanf("%d", &target_row);
+
+    int i;
+    print_header();
+    for (i = 0; (i < target_row) && (list_data[i].price != -1); i++) print_data(&list_data[i]);
 }
 
 void search_data(void) {
@@ -242,6 +284,55 @@ void search_data(void) {
     } else {
         printf("Data not found!\n");
     }
+}
+
+void sort_data(void) {
+    int n;
+    for (n = 0; n < MAX_DATA_COUNT; n++) {
+        export_list_data[n] = list_data[n];
+    }
+
+    int to_sort = get_column_id();
+    if (to_sort == -1) return;
+
+    printf("Sort ascending or descending? ");
+    char order_str[10];
+    scanf("%s", order_str);
+    int order = (!strcmp(order_str, "asc")) ? SORT_ASCENDING : SORT_DESCENDING;
+
+    switch (to_sort) {
+        // case SEARCH_LOCATION:
+        //     sort_by_location(export_list_data, order);
+        //     break;
+        // case SEARCH_CITY:
+        //     sort_by_city(export_list_data, order);
+        //     break;
+        case SEARCH_PRICE:
+            bubble_sort(export_list_data, data_count, order, compare_price);
+            break;
+        case SEARCH_ROOMS:
+            bubble_sort(export_list_data, data_count, order, compare_room);
+            break;
+        case SEARCH_BATHROOM:
+            bubble_sort(export_list_data, data_count, order, compare_bathroom);
+            break;
+        case SEARCH_PARK:
+            bubble_sort(export_list_data, data_count, order, compare_park);
+            break;
+        // case SEARCH_TYPE:
+        //     sort_by_type(export_list_data, order);
+        //     break;
+        // case SEARCH_FURNISH:
+        //     sort_by_furnish(export_list_data, order);
+        //     break;
+        default:
+            printf("Failed to sort data!\n");
+            return;
+    }
+
+    print_header();
+    int i;
+    for (i = 0; i < 100; i++) print_data(&export_list_data[i]);
 }
 
 void export_data(void) {
@@ -303,6 +394,7 @@ void select_menu(int menu) {
             search_data();
             break;
         case MENU_SORT:
+            sort_data();
             break;
         case MENU_EXPORT:
             export_data();
