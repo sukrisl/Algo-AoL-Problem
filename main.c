@@ -1,5 +1,5 @@
 /**
- * Algorithm and Programming Assurance of Learning Project - Problem #2
+ * Algorithm and Programming Assurance of Learning Project - Problem #1 and #2
  *
  * Class LD75
  *
@@ -8,6 +8,7 @@
  * - Sukriansyah Laksono (2702282982)
  */
 
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -385,11 +386,30 @@ bool load_file(const char* fname) {
     return true;
 }
 
-int main() {
+void problem_1(void) {
+    char input[100];
+    fflush(stdin);
+    gets(input);
+
+    int len = strlen(input);
+    char sorted[len + 1];
+
+    int i;
+    char token;
+    for (i = 0; i < len && token != '\n'; i++) {
+        token = (isupper(input[i])) ? tolower(input[i]) : toupper(input[i]);
+        sorted[len - i - 1] = token;
+    }
+
+    sorted[len] = '\n';
+    printf("%s", sorted);
+}
+
+void problem_2(void) {
 #ifdef BUILT_USING_CMAKE
-    if (!load_file("../file.csv")) return 1;
+    if (!load_file("../file.csv")) return;
 #else
-    if (!load_file("file.csv")) return 1;
+    if (!load_file("file.csv")) return;
 #endif  // BUILT_USING_CMAKE
 
     int input = 0;
@@ -399,6 +419,10 @@ int main() {
         fflush(stdin);
         select_menu(input);
     }
+}
 
+int main() {
+    problem_1();
+    problem_2();
     return 0;
 }
