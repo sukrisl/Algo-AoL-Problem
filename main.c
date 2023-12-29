@@ -122,6 +122,14 @@ static int search_integer(Data_t* dest, MatchIntFunction match) {
     return found;
 }
 
+static bool compare_location(Data_t* a, Data_t* b) {
+    return (strcmp(b->location, a->location) > 0);
+}
+
+static bool compare_city(Data_t* a, Data_t* b) {
+    return (strcmp(b->city, a->city) > 0);
+}
+
 static bool compare_price(Data_t* a, Data_t* b) {
     return (a->price < b->price);
 }
@@ -136,6 +144,14 @@ static bool compare_bathroom(Data_t* a, Data_t* b) {
 
 static bool compare_park(Data_t* a, Data_t* b) {
     return (a->park < b->park);
+}
+
+static bool compare_type(Data_t* a, Data_t* b) {
+    return (strcmp(b->type, a->type) > 0);
+}
+
+static bool compare_furnish(Data_t* a, Data_t* b) {
+    return (strcmp(b->furnish, a->furnish) > 0);
 }
 
 static void bubble_sort(Data_t* data, size_t size, int order, CompareFunction comp) {
@@ -221,12 +237,12 @@ void sort_data(void) {
     int order = (!strcmp(order_str, "asc")) ? SORT_ASCENDING : SORT_DESCENDING;
 
     switch (to_sort) {
-        // case SEARCH_LOCATION:
-        //     sort_by_location(export_list_data, order);
-        //     break;
-        // case SEARCH_CITY:
-        //     sort_by_city(export_list_data, order);
-        //     break;
+        case SEARCH_LOCATION:
+            bubble_sort(export_list_data, data_count, order, compare_location);
+            break;
+        case SEARCH_CITY:
+            bubble_sort(export_list_data, data_count, order, compare_city);
+            break;
         case SEARCH_PRICE:
             bubble_sort(export_list_data, data_count, order, compare_price);
             break;
@@ -239,12 +255,12 @@ void sort_data(void) {
         case SEARCH_PARK:
             bubble_sort(export_list_data, data_count, order, compare_park);
             break;
-        // case SEARCH_TYPE:
-        //     sort_by_type(export_list_data, order);
-        //     break;
-        // case SEARCH_FURNISH:
-        //     sort_by_furnish(export_list_data, order);
-        //     break;
+        case SEARCH_TYPE:
+            bubble_sort(export_list_data, data_count, order, compare_type);
+            break;
+        case SEARCH_FURNISH:
+            bubble_sort(export_list_data, data_count, order, compare_furnish);
+            break;
         default:
             printf("Failed to sort data!\n");
             return;
@@ -252,7 +268,7 @@ void sort_data(void) {
 
     print_header();
     int i;
-    for (i = 0; i < 100; i++) print_data(&export_list_data[i]);
+    for (i = 0; i < 10; i++) print_data(&export_list_data[i]);
 }
 
 void export_data(void) {
