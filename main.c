@@ -32,6 +32,7 @@ typedef struct {
 } Data_t;
 
 typedef bool (*CompareFunction)(Data_t* a, Data_t* b);
+typedef bool (*MatchStrFunction)(Data_t* data, const char* str);
 
 Data_t list_data[MAX_DATA_COUNT];
 Data_t export_list_data[MAX_DATA_COUNT];
@@ -90,34 +91,6 @@ static int get_column_id(void) {
     return -1;
 }
 
-static int search_by_location(Data_t* dest) {
-    char location[100];
-    fflush(stdin);
-    gets(location);
-
-    int i, found = 0;
-    for (i = 0; list_data[i].price != -1 && i < data_count; i++) {
-        if (!strcmp(list_data[i].location, location)) {
-            dest[found++] = list_data[i];
-        }
-    }
-    return found;
-}
-
-static int search_by_city(Data_t* dest) {
-    char city[100];
-    fflush(stdin);
-    gets(city);
-
-    int i, found = 0;
-    for (i = 0; list_data[i].price != -1 && i < data_count; i++) {
-        if (!strcmp(list_data[i].city, city)) {
-            dest[found++] = list_data[i];
-        }
-    }
-    return found;
-}
-
 static int search_by_price(Data_t* dest) {
     int price;
     fflush(stdin);
@@ -174,28 +147,30 @@ static int search_by_park(Data_t* dest) {
     return found;
 }
 
-static int search_by_type(Data_t* dest) {
-    char type[100];
-    fflush(stdin);
-    gets(type);
-
-    int i, found = 0;
-    for (i = 0; list_data[i].price != -1 && i < data_count; i++) {
-        if (!strcmp(list_data[i].type, type)) {
-            dest[found++] = list_data[i];
-        }
-    }
-    return found;
+static bool match_location(Data_t* data, const char* location) {
+    return !strcmp(data->location, location);
 }
 
-static int search_by_furnish(Data_t* dest) {
-    char furnish[100];
+static bool match_city(Data_t* data, const char* city) {
+    return !strcmp(data->city, city);
+}
+
+static bool match_type(Data_t* data, const char* type) {
+    return !strcmp(data->type, type);
+}
+
+static bool match_furnish(Data_t* data, const char* furnish) {
+    return !strcmp(data->furnish, furnish);
+}
+
+static int search_string(Data_t* dest, MatchStrFunction match) {
+    char str[100];
     fflush(stdin);
-    gets(furnish);
+    gets(str);
 
     int i, found = 0;
     for (i = 0; list_data[i].price != -1 && i < data_count; i++) {
-        if (!strcmp(list_data[i].furnish, furnish)) {
+        if (match(&list_data[i], str)) {
             dest[found++] = list_data[i];
         }
     }
@@ -251,10 +226,10 @@ void search_data(void) {
 
     switch (to_search) {
         case SEARCH_LOCATION:
-            found = search_by_location(export_list_data);
+            found = search_string(export_list_data, match_location);
             break;
         case SEARCH_CITY:
-            found = search_by_city(export_list_data);
+            found = search_string(export_list_data, match_city);
             break;
         case SEARCH_PRICE:
             found = search_by_price(export_list_data);
@@ -269,10 +244,10 @@ void search_data(void) {
             found = search_by_park(export_list_data);
             break;
         case SEARCH_TYPE:
-            found = search_by_type(export_list_data);
+            found = search_string(export_list_data, match_type);
             break;
         case SEARCH_FURNISH:
-            found = search_by_furnish(export_list_data);
+            found = search_string(export_list_data, match_furnish);
             break;
     }
 
