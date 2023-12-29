@@ -1,3 +1,13 @@
+/**
+ * Algorithm and Programming Assurance of Learning Project - Problem #2
+ *
+ * Class LD75
+ *
+ * Author:
+ * - Gilmore (2702231861)
+ * - Sukriansyah Laksono (2702282982)
+ */
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
